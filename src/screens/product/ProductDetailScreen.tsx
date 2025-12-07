@@ -6,14 +6,55 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Alert,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useCart } from "../../context/CartContext";
+import { useFavorite } from "../../context/FavoriteContext";
 
 export default function ProductDetailsScreen({ route, navigation }: any) {
-  const { product } = route.params;
-
+  // Tous les hooks doivent être appelés en premier, dans le même ordre à chaque rendu
+  const { addToCart } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorite();
   const [selectedSize, setSelectedSize] = useState("Small");
   const [selectedSugar, setSelectedSugar] = useState("No Sugar");
+
+  // Accéder aux paramètres après les hooks
+  const product = route.params?.product;
+
+  const handleAddToCart = () => {
+    if (!product) return;
+    addToCart(product, selectedSize, selectedSugar);
+    Alert.alert(
+      "Success",
+      "Product added to cart!",
+      [
+        {
+          text: "Continue Shopping",
+          style: "cancel",
+        },
+        {
+          text: "View Cart",
+          onPress: () => navigation.navigate("Cart"),
+        },
+      ]
+    );
+  };
+
+  // Si le produit n'est pas disponible, afficher un message d'erreur
+  if (!product) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Product not found</Text>
+        <TouchableOpacity
+          style={styles.backBtn}
+          onPress={() => navigation.goBack()}
+        >
+          <Ionicons name="chevron-back" size={26} color="#0A2F17" />
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -29,8 +70,15 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
       </TouchableOpacity>
 
       {/* FAVORITE BUTTON */}
-      <TouchableOpacity style={styles.favoriteBtn}>
-        <Ionicons name="heart-outline" size={26} color="#0A2F17" />
+      <TouchableOpacity 
+        style={styles.favoriteBtn}
+        onPress={() => product && toggleFavorite(product.id)}
+      >
+        <Ionicons 
+          name={product && isFavorite(product.id) ? "heart" : "heart-outline"} 
+          size={26} 
+          color={product && isFavorite(product.id) ? "#FF0000" : "#0A2F17"} 
+        />
       </TouchableOpacity>
 
       {/* WHITE CONTENT */}
@@ -105,7 +153,7 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
 
       {/* ADD TO CART */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.cartBtn}>
+        <TouchableOpacity style={styles.cartBtn} onPress={handleAddToCart}>
           <Text style={styles.cartBtnText}>Add to cart</Text>
           <Text style={styles.cartPrice}>Rp {product.price.toLocaleString()}</Text>
         </TouchableOpacity>

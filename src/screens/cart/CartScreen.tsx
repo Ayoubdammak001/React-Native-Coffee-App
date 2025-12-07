@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,18 +6,71 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
+    Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../../context/CartContext';
+import { useFavorite } from '../../context/FavoriteContext';
 
 export default function CartScreen({ navigation }: any) {
-    const { items, updateQuantity } = useCart();
+    const { items, updateQuantity, clearCart } = useCart();
+    const { isFavorite, toggleFavorite } = useFavorite();
+    const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
     
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
     const subtotal = items.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
     const discount = subtotal > 0 ? 25000 : 0;
     const total = Math.max(0, subtotal - discount);
+
+    const handleBuy = () => {
+        if (items.length === 0) {
+            Alert.alert('Error', 'Your cart is empty');
+            return;
+        }
+
+        if (!selectedPayment) {
+            Alert.alert(
+                'Payment Method Required',
+                'Please select a payment method',
+                [{ text: 'OK' }]
+            );
+            return;
+        }
+
+        Alert.alert(
+            'Confirm Purchase',
+            `Total: Rp ${total.toLocaleString()}\n\nDo you want to proceed with the purchase?`,
+            [
+                {
+                    text: 'Cancel',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Confirm',
+                    onPress: () => {
+                        // Simuler le traitement du paiement
+                        setTimeout(() => {
+                            clearCart();
+                            setSelectedPayment(null);
+                            Alert.alert(
+                                'Success!',
+                                'Your order has been placed successfully!',
+                                [
+                                    {
+                                        text: 'OK',
+                                        onPress: () => {
+                                            navigation.navigate('HomeScreen');
+                                        },
+                                    },
+                                ]
+                            );
+                        }, 500);
+                    },
+                },
+            ]
+        );
+    };
 
     return (
         <View style={styles.container}>
@@ -45,8 +98,15 @@ export default function CartScreen({ navigation }: any) {
                                     <Text style={styles.productTitle}>{item.product.title}</Text>
                                     <Text style={styles.productSubtitle}>{item.product.subtitle}</Text>
                                 </View>
-                                <TouchableOpacity style={styles.favoriteBtn}>
-                                    <Ionicons name="heart-outline" size={20} color="#00512C" />
+                                <TouchableOpacity 
+                                    style={styles.favoriteBtn}
+                                    onPress={() => toggleFavorite(item.product.id)}
+                                >
+                                    <Ionicons 
+                                        name={isFavorite(item.product.id) ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isFavorite(item.product.id) ? "#FF0000" : "#00512C"} 
+                                    />
                                 </TouchableOpacity>
                             </View>
 
@@ -108,33 +168,69 @@ export default function CartScreen({ navigation }: any) {
                         <View style={styles.paymentSection}>
                             <Text style={styles.paymentTitle}>Payment</Text>
                             <View style={styles.paymentMethods}>
-                                <TouchableOpacity style={styles.paymentMethod}>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.paymentMethod,
+                                        selectedPayment === 'mastercard' && styles.paymentMethodSelected
+                                    ]}
+                                    onPress={() => setSelectedPayment('mastercard')}
+                                >
                                     <Image 
                                         source={require('../../assets/icons/master_card.png')} 
                                         style={styles.paymentMethodImage}
                                         resizeMode="contain"
                                     />
+                                    {selectedPayment === 'mastercard' && (
+                                        <View style={styles.paymentCheck}>
+                                            <Ionicons name="checkmark-circle" size={20} color="#00512C" />
+                                        </View>
+                                    )}
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.paymentMethod}>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.paymentMethod,
+                                        selectedPayment === 'paypal' && styles.paymentMethodSelected
+                                    ]}
+                                    onPress={() => setSelectedPayment('paypal')}
+                                >
                                     <Image 
                                         source={require('../../assets/icons/paypal.png')} 
                                         style={styles.paymentMethodImage}
                                         resizeMode="contain"
                                     />
+                                    {selectedPayment === 'paypal' && (
+                                        <View style={styles.paymentCheck}>
+                                            <Ionicons name="checkmark-circle" size={20} color="#00512C" />
+                                        </View>
+                                    )}
                                 </TouchableOpacity>
-                                <TouchableOpacity style={styles.paymentMethod}>
+                                <TouchableOpacity 
+                                    style={[
+                                        styles.paymentMethod,
+                                        selectedPayment === 'visa' && styles.paymentMethodSelected
+                                    ]}
+                                    onPress={() => setSelectedPayment('visa')}
+                                >
                                     <Image 
                                         source={require('../../assets/icons/master_card.png')} 
                                         style={styles.paymentMethodImage}
                                         resizeMode="contain"
                                     />
+                                    {selectedPayment === 'visa' && (
+                                        <View style={styles.paymentCheck}>
+                                            <Ionicons name="checkmark-circle" size={20} color="#00512C" />
+                                        </View>
+                                    )}
                                 </TouchableOpacity>
                             </View>
                         </View>
 
                         {/* BUY BUTTON */}
-                        <TouchableOpacity style={styles.buyButton}>
-                            <Text style={styles.buyButtonText}>Buy</Text>
+                        <TouchableOpacity 
+                            style={styles.buyButton}
+                            onPress={handleBuy}
+                        >
+                            <Text style={styles.buyButtonText}>Buy Now</Text>
                         </TouchableOpacity>
                     </>
                 )}
@@ -145,7 +241,7 @@ export default function CartScreen({ navigation }: any) {
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
                     <Ionicons name="home" size={26} color="#00512C" />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('FavoriteProduct')}>
                     <Ionicons name="heart-outline" size={26} color="#999" />
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -160,7 +256,7 @@ export default function CartScreen({ navigation }: any) {
                         </View>
                     )}
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ProfileDetails')}>
                     <Ionicons name="person-outline" size={26} color="#999" />
                 </TouchableOpacity>
             </View>
@@ -332,10 +428,22 @@ const styles = StyleSheet.create({
         borderRadius: 8,
         justifyContent: 'center',
         alignItems: 'center',
+        borderWidth: 2,
+        borderColor: '#E0E0E0',
+        position: 'relative',
+    },
+    paymentMethodSelected: {
+        borderColor: '#00512C',
+        backgroundColor: '#F0F8F4',
     },
     paymentMethodImage: {
         width: '80%',
         height: '70%',
+    },
+    paymentCheck: {
+        position: 'absolute',
+        top: 4,
+        right: 4,
     },
     buyButton: {
         backgroundColor: '#00512C',

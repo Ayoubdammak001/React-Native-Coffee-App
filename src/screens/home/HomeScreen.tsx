@@ -1,4 +1,4 @@
-import React, { useState,useContext } from 'react';
+import React, { useState } from 'react';
 import {
     View,
     Text,
@@ -6,6 +6,8 @@ import {
     ScrollView,
     Image,
     TouchableOpacity,
+    TextInput,
+    Modal,
 } from 'react-native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -15,12 +17,87 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { categories } from '../../data/categories';
 import { products } from '../../data/products';
 import { useCart } from '../../context/CartContext';
+import { useFavorite } from '../../context/FavoriteContext';
+import { useAuth } from '../../context/AuthContext';
 
 export default function HomeScreen({ navigation }: any) {
     const [activeCategory, setActiveCategory] = useState("Cappuccino");
+    const [searchQuery, setSearchQuery] = useState("");
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortBy, setSortBy] = useState("default"); // default, priceLow, priceHigh, nameAZ
+    const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
     const { addToCart, items } = useCart();
+    const { isFavorite, toggleFavorite } = useFavorite();
+    const { user } = useAuth();
     
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    // Fonction pour obtenir le message de salutation selon l'heure
+    const getGreeting = () => {
+        const hour = new Date().getHours();
+        if (hour < 12) return 'Good morning';
+        if (hour < 18) return 'Good afternoon';
+        return 'Good evening';
+    };
+
+    // Obtenir le nom à afficher (nom ou email ou valeur par défaut)
+    const getUserDisplayName = () => {
+        if (user?.name && user.name.trim()) {
+            return user.name;
+        }
+        if (user?.email) {
+            // Extraire la partie avant @ de l'email
+            return user.email.split('@')[0];
+        }
+        return 'Guest';
+    };
+
+    // Filtrer et trier les produits
+    const getFilteredProducts = () => {
+        let filtered = products;
+
+        // Filtrage par recherche
+        if (searchQuery.trim()) {
+            filtered = filtered.filter(product =>
+                product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                product.category.toLowerCase().includes(searchQuery.toLowerCase())
+            );
+        } else {
+            // Filtrer par catégorie si pas de recherche
+            filtered = filtered.filter(p => p.category === activeCategory);
+        }
+
+        // Filtrage par prix
+        filtered = filtered.filter(product =>
+            product.price >= priceRange.min && product.price <= priceRange.max
+        );
+
+        // Tri
+        let sorted = [...filtered];
+        switch (sortBy) {
+            case 'priceLow':
+                sorted.sort((a, b) => a.price - b.price);
+                break;
+            case 'priceHigh':
+                sorted.sort((a, b) => b.price - a.price);
+                break;
+            case 'nameAZ':
+                sorted.sort((a, b) => a.title.localeCompare(b.title));
+                break;
+            default:
+                // Ordre par défaut
+                break;
+        }
+
+        return sorted;
+    };
+
+    const filteredProducts = getFilteredProducts();
+
+    const resetFilters = () => {
+        setSortBy("default");
+        setPriceRange({ min: 0, max: 100000 });
+    };
 
     return (
         <View style={styles.container}>
@@ -32,8 +109,10 @@ export default function HomeScreen({ navigation }: any) {
                     style={styles.avatar}
                 />
                 <View>
-                    <Text style={styles.locationText}>Jakarta, Indonesia</Text>
-                    <Text style={styles.greeting}>Good morning, Yudi</Text>
+                    <Text style={styles.locationText}>Sfax, Tunisia</Text>
+                    <Text style={styles.greeting}>
+                        {getGreeting()}, {getUserDisplayName()}
+                    </Text>
                 </View>
                 <Ionicons name="notifications-outline" size={24} color="#00512C" />
             </View>
@@ -41,44 +120,76 @@ export default function HomeScreen({ navigation }: any) {
             {/* SEARCH BAR */}
             <View style={styles.searchContainer}>
                 <Feather name="search" size={20} color="#777" />
-                <Text style={styles.searchPlaceholder}>Search Coffee ...</Text>
-                <Feather name="sliders" size={20} color="#00512C" />
+                <TextInput
+                    style={styles.searchInput}
+                    placeholder="Search Coffee ..."
+                    placeholderTextColor="#80A896"
+                    value={searchQuery}
+                    onChangeText={setSearchQuery}
+                    autoCapitalize="none"
+                />
+                {searchQuery.length > 0 && (
+                    <TouchableOpacity onPress={() => setSearchQuery("")}>
+                        <Ionicons name="close-circle" size={20} color="#777" />
+                    </TouchableOpacity>
+                )}
+                <TouchableOpacity onPress={() => setShowFilters(true)}>
+                    <Feather name="sliders" size={20} color="#00512C" />
+                </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
 
-                {/* CATEGORIES */}
-                <Text style={styles.sectionTitle}>Categories</Text>
-
-                <View style={styles.categoryContainer}>
-                    {categories.map(cat => (
-                        <TouchableOpacity
-                            key={cat.id}
-                            style={
-                                activeCategory === cat.name
-                                    ? styles.categoryActive
-                                    : styles.category
-                            }
-                            onPress={() => setActiveCategory(cat.name)}
-                        >
-                            <Text
-                                style={
-                                    activeCategory === cat.name
-                                        ? styles.categoryActiveText
-                                        : styles.categoryText
-                                }
-                            >
-                                {cat.name}
-                            </Text>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                {/* CATEGORIES - Masquer si recherche active */}
+                {!searchQuery.trim() && (
+                    <>
+                        <Text style={styles.sectionTitle}>Categories</Text>
+                        <View style={styles.categoryContainer}>
+                            {categories.map(cat => (
+                                <TouchableOpacity
+                                    key={cat.id}
+                                    style={
+                                        activeCategory === cat.name
+                                            ? styles.categoryActive
+                                            : styles.category
+                                    }
+                                    onPress={() => setActiveCategory(cat.name)}
+                                >
+                                    <Text
+                                        style={
+                                            activeCategory === cat.name
+                                                ? styles.categoryActiveText
+                                                : styles.categoryText
+                                        }
+                                    >
+                                        {cat.name}
+                                    </Text>
+                                </TouchableOpacity>
+                            ))}
+                        </View>
+                    </>
+                )}
 
                 {/* PRODUCT LIST */}
-                <View style={styles.cardRow}>
-                    {products
-                        .filter(p => p.category === activeCategory)
-                        .map(product => (
+                {searchQuery.trim() ? (
+                    <Text style={styles.sectionTitle}>
+                        Search Results ({filteredProducts.length})
+                    </Text>
+                ) : (
+                    <Text style={styles.sectionTitle}>Products</Text>
+                )}
+
+                {filteredProducts.length === 0 ? (
+                    <View style={styles.emptyContainer}>
+                        <Ionicons name="search-outline" size={64} color="#999" />
+                        <Text style={styles.emptyText}>No products found</Text>
+                        <Text style={styles.emptySubtext}>
+                            Try searching with different keywords
+                        </Text>
+                    </View>
+                ) : (
+                    <View style={styles.cardRow}>
+                        {filteredProducts.map(product => (
                             <TouchableOpacity
                                 key={product.id}
                                 style={styles.card}
@@ -87,8 +198,15 @@ export default function HomeScreen({ navigation }: any) {
 
                                 <Image source={product.image} style={styles.cardImage} />
 
-                                <TouchableOpacity style={styles.favoriteBtn}>
-                                    <Ionicons name="heart-outline" size={20} color="#00512C" />
+                                <TouchableOpacity 
+                                    style={styles.favoriteBtn}
+                                    onPress={() => toggleFavorite(product.id)}
+                                >
+                                    <Ionicons 
+                                        name={isFavorite(product.id) ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isFavorite(product.id) ? "#FF0000" : "#00512C"} 
+                                    />
                                 </TouchableOpacity>
 
                                 <Text style={styles.cardTitle}>{product.title}</Text>
@@ -108,47 +226,195 @@ export default function HomeScreen({ navigation }: any) {
                                 </View>
                             </TouchableOpacity>
                         ))}
-                </View>
+                    </View>
+                )}
 
-                {/* SPECIAL OFFER */}
-                <Text style={styles.sectionTitle}>Special Offer</Text>
+                {/* SPECIAL OFFER - Masquer si recherche active */}
+                {!searchQuery.trim() && (
+                    <>
+                        <Text style={styles.sectionTitle}>Special Offer</Text>
+                        <View style={styles.cardRow}>
+                            {products.slice(2, 4).map(product => (
+                                <TouchableOpacity
+                                    key={product.id}
+                                    style={styles.card}
+                                    onPress={() => navigation.navigate("ProductDetails", { product })}
+                                >
+                                    <Image source={product.image} style={styles.cardImage} />
 
-                <View style={styles.cardRow}>
-                    {products.slice(2, 4).map(product => (
-                        <TouchableOpacity
-                            key={product.id}
-                            style={styles.card}
-                            onPress={() => navigation.navigate("ProductDetails", { product })}
-                        >
-                            <Image source={product.image} style={styles.cardImage} />
+                                    <TouchableOpacity 
+                                        style={styles.favoriteBtn}
+                                        onPress={() => toggleFavorite(product.id)}
+                                    >
+                                        <Ionicons 
+                                            name={isFavorite(product.id) ? "heart" : "heart-outline"} 
+                                            size={20} 
+                                            color={isFavorite(product.id) ? "#FF0000" : "#00512C"} 
+                                        />
+                                    </TouchableOpacity>
 
-                            <TouchableOpacity style={styles.favoriteBtn}>
-                                <Ionicons name="heart-outline" size={20} color="#00512C" />
-                            </TouchableOpacity>
+                                    <Text style={styles.cardTitle}>{product.title}</Text>
+                                    <Text style={styles.cardSub}>{product.subtitle}</Text>
 
-                            <Text style={styles.cardTitle}>{product.title}</Text>
-                            <Text style={styles.cardSub}>{product.subtitle}</Text>
-
-                            <View style={styles.cardBottom}>
-                                <Text style={styles.cardPrice}>
-                                    Rp {product.price.toLocaleString()}
-                                </Text>
-                                <TouchableOpacity style={styles.addBtn}>
-                                    <Ionicons name="add" size={22} color="#fff" />
+                                    <View style={styles.cardBottom}>
+                                        <Text style={styles.cardPrice}>
+                                            Rp {product.price.toLocaleString()}
+                                        </Text>
+                                        <TouchableOpacity 
+                                            style={styles.addBtn}
+                                            onPress={() => addToCart(product)}
+                                        >
+                                            <Ionicons name="add" size={22} color="#fff" />
+                                        </TouchableOpacity>
+                                    </View>
                                 </TouchableOpacity>
-                            </View>
-                        </TouchableOpacity>
-                    ))}
-                </View>
+                            ))}
+                        </View>
+                    </>
+                )}
 
             </ScrollView>
+
+            {/* FILTER MODAL */}
+            <Modal
+                visible={showFilters}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setShowFilters(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={styles.modalContent}>
+                        {/* HEADER */}
+                        <View style={styles.modalHeader}>
+                            <Text style={styles.modalTitle}>Filters</Text>
+                            <TouchableOpacity onPress={() => setShowFilters(false)}>
+                                <Ionicons name="close" size={24} color="#000" />
+                            </TouchableOpacity>
+                        </View>
+
+                        <ScrollView showsVerticalScrollIndicator={false}>
+                            {/* SORT BY */}
+                            <View style={styles.filterSection}>
+                                <Text style={styles.filterSectionTitle}>Sort By</Text>
+                                <View style={styles.filterOptions}>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.filterOption,
+                                            sortBy === 'default' && styles.filterOptionActive
+                                        ]}
+                                        onPress={() => setSortBy('default')}
+                                    >
+                                        <Text style={[
+                                            styles.filterOptionText,
+                                            sortBy === 'default' && styles.filterOptionTextActive
+                                        ]}>
+                                            Default
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.filterOption,
+                                            sortBy === 'priceLow' && styles.filterOptionActive
+                                        ]}
+                                        onPress={() => setSortBy('priceLow')}
+                                    >
+                                        <Text style={[
+                                            styles.filterOptionText,
+                                            sortBy === 'priceLow' && styles.filterOptionTextActive
+                                        ]}>
+                                            Price: Low to High
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.filterOption,
+                                            sortBy === 'priceHigh' && styles.filterOptionActive
+                                        ]}
+                                        onPress={() => setSortBy('priceHigh')}
+                                    >
+                                        <Text style={[
+                                            styles.filterOptionText,
+                                            sortBy === 'priceHigh' && styles.filterOptionTextActive
+                                        ]}>
+                                            Price: High to Low
+                                        </Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[
+                                            styles.filterOption,
+                                            sortBy === 'nameAZ' && styles.filterOptionActive
+                                        ]}
+                                        onPress={() => setSortBy('nameAZ')}
+                                    >
+                                        <Text style={[
+                                            styles.filterOptionText,
+                                            sortBy === 'nameAZ' && styles.filterOptionTextActive
+                                        ]}>
+                                            Name: A to Z
+                                        </Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+
+                            {/* PRICE RANGE */}
+                            <View style={styles.filterSection}>
+                                <Text style={styles.filterSectionTitle}>Price Range</Text>
+                                <View style={styles.priceRangeContainer}>
+                                    <View style={styles.priceInputContainer}>
+                                        <Text style={styles.priceLabel}>Min</Text>
+                                        <TextInput
+                                            style={styles.priceInput}
+                                            placeholder="0"
+                                            keyboardType="numeric"
+                                            value={priceRange.min.toString()}
+                                            onChangeText={(text) => {
+                                                const value = parseInt(text) || 0;
+                                                setPriceRange({ ...priceRange, min: value });
+                                            }}
+                                        />
+                                    </View>
+                                    <View style={styles.priceInputContainer}>
+                                        <Text style={styles.priceLabel}>Max</Text>
+                                        <TextInput
+                                            style={styles.priceInput}
+                                            placeholder="100000"
+                                            keyboardType="numeric"
+                                            value={priceRange.max.toString()}
+                                            onChangeText={(text) => {
+                                                const value = parseInt(text) || 100000;
+                                                setPriceRange({ ...priceRange, max: value });
+                                            }}
+                                        />
+                                    </View>
+                                </View>
+                            </View>
+                        </ScrollView>
+
+                        {/* FOOTER */}
+                        <View style={styles.modalFooter}>
+                            <TouchableOpacity
+                                style={styles.resetButton}
+                                onPress={resetFilters}
+                            >
+                                <Text style={styles.resetButtonText}>Reset</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={styles.applyButton}
+                                onPress={() => setShowFilters(false)}
+                            >
+                                <Text style={styles.applyButtonText}>Apply Filters</Text>
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+                </View>
+            </Modal>
 
             {/* BOTTOM TAB */}
             <View style={styles.bottomTab}>
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
                     <Ionicons name="home" size={26} color="#00512C" />
                 </TouchableOpacity>
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('FavoriteProduct')}>
                     <Ionicons name="heart-outline" size={26} color="#999" />
                 </TouchableOpacity>
                 <TouchableOpacity 
@@ -165,7 +431,7 @@ export default function HomeScreen({ navigation }: any) {
                     )}
                 </TouchableOpacity>
                 
-                <TouchableOpacity>
+                <TouchableOpacity onPress={() => navigation.navigate('ProfileDetails')}>
                     <Ionicons name="person-outline" size={26} color="#999" />
                 </TouchableOpacity>
             </View>
@@ -201,7 +467,28 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
 
-    searchPlaceholder: { flex: 1, marginLeft: 10, color: '#80A896' },
+    searchInput: {
+        flex: 1,
+        marginLeft: 10,
+        color: '#000',
+        fontSize: 14,
+    },
+    emptyContainer: {
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 60,
+    },
+    emptyText: {
+        fontSize: 18,
+        fontWeight: '600',
+        color: '#000',
+        marginTop: 16,
+    },
+    emptySubtext: {
+        fontSize: 14,
+        color: '#999',
+        marginTop: 8,
+    },
 
     sectionTitle: {
         marginTop: 22,
@@ -304,5 +591,119 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontSize: 12,
         fontWeight: '700',
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        justifyContent: 'flex-end',
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        maxHeight: '80%',
+        paddingBottom: 20,
+    },
+    modalHeader: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+    },
+    modalTitle: {
+        fontSize: 24,
+        fontWeight: '700',
+        color: '#000',
+    },
+    filterSection: {
+        padding: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: '#F0F0F0',
+    },
+    filterSectionTitle: {
+        fontSize: 18,
+        fontWeight: '700',
+        color: '#00512C',
+        marginBottom: 16,
+    },
+    filterOptions: {
+        gap: 12,
+    },
+    filterOption: {
+        paddingVertical: 12,
+        paddingHorizontal: 16,
+        borderRadius: 12,
+        backgroundColor: '#F4F4F4',
+        borderWidth: 2,
+        borderColor: 'transparent',
+    },
+    filterOptionActive: {
+        backgroundColor: '#F0F8F4',
+        borderColor: '#00512C',
+    },
+    filterOptionText: {
+        fontSize: 16,
+        color: '#666',
+        fontWeight: '500',
+    },
+    filterOptionTextActive: {
+        color: '#00512C',
+        fontWeight: '700',
+    },
+    priceRangeContainer: {
+        flexDirection: 'row',
+        gap: 16,
+    },
+    priceInputContainer: {
+        flex: 1,
+    },
+    priceLabel: {
+        fontSize: 14,
+        color: '#666',
+        marginBottom: 8,
+        fontWeight: '500',
+    },
+    priceInput: {
+        height: 48,
+        borderWidth: 2,
+        borderColor: '#EAEAEA',
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        fontSize: 16,
+        color: '#000',
+        backgroundColor: '#F4F4F4',
+    },
+    modalFooter: {
+        flexDirection: 'row',
+        gap: 12,
+        padding: 20,
+        borderTopWidth: 1,
+        borderTopColor: '#F0F0F0',
+    },
+    resetButton: {
+        flex: 1,
+        paddingVertical: 16,
+        borderRadius: 16,
+        backgroundColor: '#F4F4F4',
+        alignItems: 'center',
+    },
+    resetButtonText: {
+        fontSize: 16,
+        fontWeight: '600',
+        color: '#666',
+    },
+    applyButton: {
+        flex: 1,
+        paddingVertical: 16,
+        borderRadius: 16,
+        backgroundColor: '#00512C',
+        alignItems: 'center',
+    },
+    applyButtonText: {
+        fontSize: 16,
+        fontWeight: '700',
+        color: '#fff',
     },
 });

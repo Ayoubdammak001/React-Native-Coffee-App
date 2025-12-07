@@ -1,21 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, Image, Alert, ActivityIndicator } from 'react-native';
 import Input from '../../components/Input';
 import Button from '../../components/Button';
 import ScreenTemplate from '../templates/ScreenTemplate';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { useAuth } from '../../context/AuthContext';
 
 function LoginPage() {
-  const [email, setEmail] = React.useState('');
-  const [password, setPassword] = React.useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
+  const { login } = useAuth();
 
+  const handleSubmit = async () => {
+    if (!email || !password) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs');
+      return;
+    }
 
-  const handleSubmit = () => {
-    console.log('Email:', email);
-    console.log('Password:', password);
-    navigation.navigate('HomeScreen' as never);
+    setLoading(true);
+    const result = await login(email, password);
+    setLoading(false);
+
+    if (result.success) {
+      navigation.navigate('HomeScreen' as never);
+    } else {
+      Alert.alert('Erreur', result.error || 'Email ou mot de passe incorrect');
+    }
   };
 
   return (
@@ -43,11 +56,23 @@ function LoginPage() {
             <Input placeholder="Email" value={email} onChangeText={setEmail} />
             <Input placeholder="Password" secureTextEntry value={password} onChangeText={setPassword} />
 
-            <Button title="Login" onPress={handleSubmit} style={styles.button} />
+            <Button
+              title={loading ? 'Logging in...' : 'Login'}
+              onPress={handleSubmit}
+              style={styles.button}
+              disabled={loading}
+            />
+            {loading && <ActivityIndicator style={styles.loader} />}
           </View>
 
           <Text style={styles.footerText}>
-            Don’t have an account? <Text style={styles.link}>Sign Up</Text>
+            Don't have an account?{' '}
+            <Text
+              style={styles.link}
+              onPress={() => navigation.navigate('SignUp' as never)}
+            >
+              Sign Up
+            </Text>
           </Text>
         </View>
       </LinearGradient>
@@ -62,7 +87,7 @@ const styles = StyleSheet.create({
 
   pattern: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.18,   // 🎯 EXACTEMENT comme ton design (ajuste ici)
+    opacity: 0.18,
   },
 
   container: {
@@ -98,6 +123,9 @@ const styles = StyleSheet.create({
   link: {
     color: '#2E7D32',
     fontWeight: '700',
+  },
+  loader: {
+    marginTop: 10,
   },
 });
 
