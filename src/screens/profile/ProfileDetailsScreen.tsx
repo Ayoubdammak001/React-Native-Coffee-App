@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     View,
     Text,
@@ -9,12 +9,114 @@ import {
     Alert,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 
 export default function ProfileDetailsScreen({ navigation }: any) {
     const { user, logout } = useAuth();
     const { theme } = useTheme();
+    const [avatarUri, setAvatarUri] = useState<string | null>(null);
+
+    // Clé de stockage pour l'avatar (par utilisateur)
+    const avatarKey = user ? `@profile_avatar_${user.id}` : '@profile_avatar_guest';
+
+    // Charger l'avatar au montage
+    useEffect(() => {
+        const loadAvatar = async () => {
+            try {
+                const stored = await AsyncStorage.getItem(avatarKey);
+                if (stored) {
+                    setAvatarUri(stored);
+                }
+            } catch (e) {
+                console.error('Error loading avatar:', e);
+            }
+        };
+        loadAvatar();
+    }, [avatarKey]);
+
+    // Fonction pour lancer la caméra
+    const handleChangeAvatar = () => {
+        // eslint-disable-next-line @typescript-eslint/no-var-requires
+        const { launchCamera, launchImageLibrary } = require('react-native-image-picker');
+
+        Alert.alert(
+            'Changer la photo de profil',
+            'Choisissez une option',
+            [
+                {
+                    text: 'Annuler',
+                    style: 'cancel',
+                },
+                {
+                    text: 'Caméra',
+                    onPress: () => {
+                        const options = {
+                            mediaType: 'photo' as const,
+                            saveToPhotos: true,
+                            cameraType: 'front' as const,
+                            quality: 0.8,
+                        };
+
+                        launchCamera(options, async (response: any) => {
+                            if (response?.didCancel) {
+                                return;
+                            }
+                            if (response?.errorCode) {
+                                Alert.alert('Erreur', "Impossible d'ouvrir la caméra.");
+                                console.error('Camera error:', response.errorMessage);
+                                return;
+                            }
+
+                            const uri = response?.assets && response.assets[0]?.uri;
+                            if (uri) {
+                                try {
+                                    setAvatarUri(uri);
+                                    await AsyncStorage.setItem(avatarKey, uri);
+                                } catch (e) {
+                                    console.error('Error saving avatar:', e);
+                                    Alert.alert('Erreur', "Impossible de sauvegarder l'image.");
+                                }
+                            }
+                        });
+                    },
+                },
+                {
+                    text: 'Galerie',
+                    onPress: () => {
+                        const options = {
+                            mediaType: 'photo' as const,
+                            quality: 0.8,
+                        };
+
+                        launchImageLibrary(options, async (response: any) => {
+                            if (response?.didCancel) {
+                                return;
+                            }
+                            if (response?.errorCode) {
+                                Alert.alert('Erreur', "Impossible d'ouvrir la galerie.");
+                                console.error('Image library error:', response.errorMessage);
+                                return;
+                            }
+
+                            const uri = response?.assets && response.assets[0]?.uri;
+                            if (uri) {
+                                try {
+                                    setAvatarUri(uri);
+                                    await AsyncStorage.setItem(avatarKey, uri);
+                                } catch (e) {
+                                    console.error('Error saving avatar:', e);
+                                    Alert.alert('Erreur', "Impossible de sauvegarder l'image.");
+                                }
+                            }
+                        });
+                    },
+                },
+            ],
+            { cancelable: true }
+        );
+    };
 
     const handleLogout = () => {
         Alert.alert(
@@ -58,10 +160,17 @@ export default function ProfileDetailsScreen({ navigation }: any) {
                 {/* PROFILE IMAGE SECTION */}
                 <View style={styles.profileImageContainer}>
                     <Image
-                        source={require('../../assets/icons/avatar.png')}
+                        source={
+                            avatarUri
+                                ? { uri: avatarUri }
+                                : require('../../assets/icons/avatar.png')
+                        }
                         style={styles.profileImage}
                     />
-                    <TouchableOpacity style={styles.editImageButton}>
+                    <TouchableOpacity 
+                        style={styles.editImageButton}
+                        onPress={handleChangeAvatar}
+                    >
                         <Ionicons name="camera" size={20} color="#fff" />
                     </TouchableOpacity>
                 </View>

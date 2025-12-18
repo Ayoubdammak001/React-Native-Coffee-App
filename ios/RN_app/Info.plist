@@ -35,6 +35,12 @@
 	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
+	<key>NSCameraUsageDescription</key>
+	<string>Cette application nécessite l'accès à la caméra pour capturer des photos de profil.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Cette application nécessite l'accès à la bibliothèque de photos pour sélectionner et enregistrer des photos de profil.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Cette application nécessite l'accès à la bibliothèque de photos pour enregistrer les photos capturées.</string>
 	<key>UILaunchStoryboardName</key>
 	<string>BootSplash</string>
 	<key>UIRequiredDeviceCapabilities</key>
