@@ -19,6 +19,7 @@ import { products } from '../../data/products';
 import { useCart } from '../../context/CartContext';
 import { useFavorite } from '../../context/FavoriteContext';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function HomeScreen({ navigation }: any) {
     const [activeCategory, setActiveCategory] = useState("Cappuccino");
@@ -29,6 +30,7 @@ export default function HomeScreen({ navigation }: any) {
     const { addToCart, items } = useCart();
     const { isFavorite, toggleFavorite } = useFavorite();
     const { user } = useAuth();
+    const { theme } = useTheme();
     
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -100,7 +102,7 @@ export default function HomeScreen({ navigation }: any) {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
 
             {/* HEADER */}
             <View style={styles.header}>
@@ -109,32 +111,32 @@ export default function HomeScreen({ navigation }: any) {
                     style={styles.avatar}
                 />
                 <View>
-                    <Text style={styles.locationText}>Sfax, Tunisia</Text>
-                    <Text style={styles.greeting}>
+                    <Text style={[styles.locationText, { color: theme.colors.text }]}>Sfax, Tunisia</Text>
+                    <Text style={[styles.greeting, { color: theme.colors.text }]}>
                         {getGreeting()}, {getUserDisplayName()}
                     </Text>
                 </View>
-                <Ionicons name="notifications-outline" size={24} color="#00512C" />
+                <Ionicons name="notifications-outline" size={24} color={theme.colors.primary} />
             </View>
 
             {/* SEARCH BAR */}
-            <View style={styles.searchContainer}>
-                <Feather name="search" size={20} color="#777" />
+            <View style={[styles.searchContainer, { backgroundColor: theme.colors.input }]}>
+                <Feather name="search" size={20} color={theme.colors.textMuted} />
                 <TextInput
-                    style={styles.searchInput}
+                    style={[styles.searchInput, { color: theme.colors.text }]}
                     placeholder="Search Coffee ..."
-                    placeholderTextColor="#80A896"
+                    placeholderTextColor={theme.colors.textMuted}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                     autoCapitalize="none"
                 />
                 {searchQuery.length > 0 && (
                     <TouchableOpacity onPress={() => setSearchQuery("")}>
-                        <Ionicons name="close-circle" size={20} color="#777" />
+                        <Ionicons name="close-circle" size={20} color={theme.colors.textMuted} />
                     </TouchableOpacity>
                 )}
                 <TouchableOpacity onPress={() => setShowFilters(true)}>
-                    <Feather name="sliders" size={20} color="#00512C" />
+                    <Feather name="sliders" size={20} color={theme.colors.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -143,8 +145,12 @@ export default function HomeScreen({ navigation }: any) {
                 {/* CATEGORIES - Masquer si recherche active */}
                 {!searchQuery.trim() && (
                     <>
-                        <Text style={styles.sectionTitle}>Categories</Text>
-                        <View style={styles.categoryContainer}>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Categories</Text>
+                        <ScrollView
+                            horizontal
+                            showsHorizontalScrollIndicator={false}
+                            contentContainerStyle={styles.categoryScroll}
+                        >
                             {categories.map(cat => (
                                 <TouchableOpacity
                                     key={cat.id}
@@ -166,24 +172,24 @@ export default function HomeScreen({ navigation }: any) {
                                     </Text>
                                 </TouchableOpacity>
                             ))}
-                        </View>
+                        </ScrollView>
                     </>
                 )}
 
                 {/* PRODUCT LIST */}
                 {searchQuery.trim() ? (
-                    <Text style={styles.sectionTitle}>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
                         Search Results ({filteredProducts.length})
                     </Text>
                 ) : (
-                    <Text style={styles.sectionTitle}>Products</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Products</Text>
                 )}
 
                 {filteredProducts.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="search-outline" size={64} color="#999" />
-                        <Text style={styles.emptyText}>No products found</Text>
-                        <Text style={styles.emptySubtext}>
+                        <Ionicons name="search-outline" size={64} color={theme.colors.textMuted} />
+                        <Text style={[styles.emptyText, { color: theme.colors.text }]}>No products found</Text>
+                        <Text style={[styles.emptySubtext, { color: theme.colors.textMuted }]}>
                             Try searching with different keywords
                         </Text>
                     </View>
@@ -192,7 +198,7 @@ export default function HomeScreen({ navigation }: any) {
                         {filteredProducts.map(product => (
                             <TouchableOpacity
                                 key={product.id}
-                                style={styles.card}
+                                style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                                 onPress={() => navigation.navigate("ProductDetails", { product })}
                             >
 
@@ -205,15 +211,15 @@ export default function HomeScreen({ navigation }: any) {
                                     <Ionicons 
                                         name={isFavorite(product.id) ? "heart" : "heart-outline"} 
                                         size={20} 
-                                        color={isFavorite(product.id) ? "#FF0000" : "#00512C"} 
+                                        color={isFavorite(product.id) ? "#FF0000" : theme.colors.primary} 
                                     />
                                 </TouchableOpacity>
 
-                                <Text style={styles.cardTitle}>{product.title}</Text>
-                                <Text style={styles.cardSub}>{product.subtitle}</Text>
+                                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{product.title}</Text>
+                                <Text style={[styles.cardSub, { color: theme.colors.textMuted }]}>{product.subtitle}</Text>
 
                                 <View style={styles.cardBottom}>
-                                    <Text style={styles.cardPrice}>
+                                    <Text style={[styles.cardPrice, { color: theme.colors.primary }]}>
                                         Rp {product.price.toLocaleString()}
                                     </Text>
 
@@ -232,12 +238,12 @@ export default function HomeScreen({ navigation }: any) {
                 {/* SPECIAL OFFER - Masquer si recherche active */}
                 {!searchQuery.trim() && (
                     <>
-                        <Text style={styles.sectionTitle}>Special Offer</Text>
+                        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Special Offer</Text>
                         <View style={styles.cardRow}>
                             {products.slice(2, 4).map(product => (
                                 <TouchableOpacity
                                     key={product.id}
-                                    style={styles.card}
+                                    style={[styles.card, { backgroundColor: theme.colors.card, borderColor: theme.colors.border }]}
                                     onPress={() => navigation.navigate("ProductDetails", { product })}
                                 >
                                     <Image source={product.image} style={styles.cardImage} />
@@ -246,18 +252,18 @@ export default function HomeScreen({ navigation }: any) {
                                         style={styles.favoriteBtn}
                                         onPress={() => toggleFavorite(product.id)}
                                     >
-                                        <Ionicons 
-                                            name={isFavorite(product.id) ? "heart" : "heart-outline"} 
-                                            size={20} 
-                                            color={isFavorite(product.id) ? "#FF0000" : "#00512C"} 
+                                    <Ionicons 
+                                        name={isFavorite(product.id) ? "heart" : "heart-outline"} 
+                                        size={20} 
+                                        color={isFavorite(product.id) ? "#FF0000" : theme.colors.primary} 
                                         />
                                     </TouchableOpacity>
 
-                                    <Text style={styles.cardTitle}>{product.title}</Text>
-                                    <Text style={styles.cardSub}>{product.subtitle}</Text>
+                                    <Text style={[styles.cardTitle, { color: theme.colors.text }]}>{product.title}</Text>
+                                    <Text style={[styles.cardSub, { color: theme.colors.textMuted }]}>{product.subtitle}</Text>
 
                                     <View style={styles.cardBottom}>
-                                        <Text style={styles.cardPrice}>
+                                        <Text style={[styles.cardPrice, { color: theme.colors.primary }]}>
                                             Rp {product.price.toLocaleString()}
                                         </Text>
                                         <TouchableOpacity 
@@ -410,18 +416,23 @@ export default function HomeScreen({ navigation }: any) {
             </Modal>
 
             {/* BOTTOM TAB */}
-            <View style={styles.bottomTab}>
+            <View
+                style={[
+                    styles.bottomTab,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                ]}
+            >
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-                    <Ionicons name="home" size={26} color="#00512C" />
+                    <Ionicons name="home" size={26} color={theme.colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('FavoriteProduct')}>
-                    <Ionicons name="heart-outline" size={26} color="#999" />
+                    <Ionicons name="heart-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Cart')}
                     style={styles.cartIconContainer}
                 >
-                    <Ionicons name="cart-outline" size={26} color="#999" />
+                    <Ionicons name="cart-outline" size={26} color={theme.colors.textMuted} />
                     {cartItemCount > 0 && (
                         <View style={styles.cartBadge}>
                             <Text style={styles.cartBadgeText}>
@@ -432,7 +443,7 @@ export default function HomeScreen({ navigation }: any) {
                 </TouchableOpacity>
                 
                 <TouchableOpacity onPress={() => navigation.navigate('ProfileDetails')}>
-                    <Ionicons name="person-outline" size={26} color="#999" />
+                    <Ionicons name="person-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
             </View>
 
@@ -498,7 +509,11 @@ const styles = StyleSheet.create({
         color: '#00512C',
     },
 
-    categoryContainer: { flexDirection: 'row', gap: 12 },
+    categoryScroll: {
+        flexDirection: 'row',
+        gap: 12,
+        paddingRight: 12,
+    },
 
     category: {
         paddingVertical: 8,

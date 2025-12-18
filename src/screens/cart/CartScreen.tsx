@@ -11,10 +11,12 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useCart } from '../../context/CartContext';
 import { useFavorite } from '../../context/FavoriteContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function CartScreen({ navigation }: any) {
     const { items, updateQuantity, clearCart } = useCart();
     const { isFavorite, toggleFavorite } = useFavorite();
+    const { theme } = useTheme();
     const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
     
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -73,19 +75,21 @@ export default function CartScreen({ navigation }: any) {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Cart</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Cart</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 {/* PRODUCT LIST */}
                 {items.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="cart-outline" size={64} color="#999" />
-                        <Text style={styles.emptyText}>Your cart is empty</Text>
-                        <Text style={styles.emptySubtext}>Add items from the home screen</Text>
+                        <Ionicons name="cart-outline" size={64} color={theme.colors.textMuted} />
+                        <Text style={[styles.emptyText, { color: theme.colors.text }]}>Your cart is empty</Text>
+                        <Text style={[styles.emptySubtext, { color: theme.colors.textMuted }]}>
+                            Add items from the home screen
+                        </Text>
                     </View>
                 ) : (
                     items.map((item) => (
@@ -95,8 +99,12 @@ export default function CartScreen({ navigation }: any) {
                         <View style={styles.productInfo}>
                             <View style={styles.productHeader}>
                                 <View style={styles.productTitleContainer}>
-                                    <Text style={styles.productTitle}>{item.product.title}</Text>
-                                    <Text style={styles.productSubtitle}>{item.product.subtitle}</Text>
+                                    <Text style={[styles.productTitle, { color: theme.colors.text }]}>
+                                        {item.product.title}
+                                    </Text>
+                                    <Text style={[styles.productSubtitle, { color: theme.colors.textMuted }]}>
+                                        {item.product.subtitle}
+                                    </Text>
                                 </View>
                                 <TouchableOpacity 
                                     style={styles.favoriteBtn}
@@ -110,7 +118,7 @@ export default function CartScreen({ navigation }: any) {
                                 </TouchableOpacity>
                             </View>
 
-                            <Text style={styles.productPrice}>
+                            <Text style={[styles.productPrice, { color: theme.colors.text }]}>
                                 Rp {item.product.price.toLocaleString()}
                             </Text>
 
@@ -148,25 +156,37 @@ export default function CartScreen({ navigation }: any) {
                 {/* ORDER SUMMARY */}
                 {items.length > 0 && (
                     <>
-                        <View style={styles.summaryContainer}>
+                        <View style={[styles.summaryContainer, { backgroundColor: theme.colors.card }]}>
                             <View style={styles.summaryItem}>
-                                <Text style={styles.summaryLabel}>Subtotal</Text>
-                                <Text style={styles.summaryValue}>Rp {subtotal.toLocaleString()}</Text>
+                                <Text style={[styles.summaryLabel, { color: theme.colors.textMuted }]}>
+                                    Subtotal
+                                </Text>
+                                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                                    Rp {subtotal.toLocaleString()}
+                                </Text>
                             </View>
                             <View style={styles.summaryItem}>
-                                <Text style={styles.summaryLabel}>Discount</Text>
-                                <Text style={styles.summaryValue}>Rp {discount.toLocaleString()}</Text>
+                                <Text style={[styles.summaryLabel, { color: theme.colors.textMuted }]}>
+                                    Discount
+                                </Text>
+                                <Text style={[styles.summaryValue, { color: theme.colors.text }]}>
+                                    Rp {discount.toLocaleString()}
+                                </Text>
                             </View>
                             <View style={styles.summaryDivider} />
                             <View style={styles.summaryItem}>
-                                <Text style={styles.summaryTotalLabel}>Total</Text>
-                                <Text style={styles.summaryTotalValue}>Rp {total.toLocaleString()}</Text>
+                                <Text style={[styles.summaryTotalLabel, { color: theme.colors.text }]}>
+                                    Total
+                                </Text>
+                                <Text style={[styles.summaryTotalValue, { color: theme.colors.text }]}>
+                                    Rp {total.toLocaleString()}
+                                </Text>
                             </View>
                         </View>
 
                         {/* PAYMENT SECTION */}
                         <View style={styles.paymentSection}>
-                            <Text style={styles.paymentTitle}>Payment</Text>
+                            <Text style={[styles.paymentTitle, { color: theme.colors.text }]}>Payment</Text>
                             <View style={styles.paymentMethods}>
                                 <TouchableOpacity 
                                     style={[
@@ -237,17 +257,22 @@ export default function CartScreen({ navigation }: any) {
             </ScrollView>
 
             {/* BOTTOM NAVIGATION */}
-            <View style={styles.bottomTab}>
+            <View
+                style={[
+                    styles.bottomTab,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                ]}
+            >
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-                    <Ionicons name="home" size={26} color="#00512C" />
+                    <Ionicons name="home" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('FavoriteProduct')}>
-                    <Ionicons name="heart-outline" size={26} color="#999" />
+                    <Ionicons name="heart-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     style={styles.cartIconContainer}
                 >
-                    <Ionicons name="cart-outline" size={26} color="#00512C" />
+                    <Ionicons name="cart-outline" size={26} color={theme.colors.primary} />
                     {cartItemCount > 0 && (
                         <View style={styles.cartBadge}>
                             <Text style={styles.cartBadgeText}>
@@ -257,7 +282,7 @@ export default function CartScreen({ navigation }: any) {
                     )}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('ProfileDetails')}>
-                    <Ionicons name="person-outline" size={26} color="#999" />
+                    <Ionicons name="person-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
             </View>
         </View>

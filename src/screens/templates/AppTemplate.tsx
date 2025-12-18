@@ -1,14 +1,18 @@
-import { StatusBar, useColorScheme } from 'react-native';
+import { StatusBar } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import ScreenTemplate from './ScreenTemplate';
 import React, { PropsWithChildren } from 'react';
+import { useTheme } from '../../context/ThemeContext';
+
 function AppTemplate(props: PropsWithChildren) {
-  const isDarkMode = useColorScheme() === 'dark';
- return (
-  <SafeAreaProvider>
-    <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+  const { theme } = useTheme();
+  return (
+    <SafeAreaProvider style={{ backgroundColor: theme.colors.background }}>
+      <StatusBar
+        barStyle={theme.name === 'dark' ? 'light-content' : 'dark-content'}
+        backgroundColor={theme.colors.background}
+      />
       {props.children}
-  </SafeAreaProvider>
-);
+    </SafeAreaProvider>
+  );
 }
 export default AppTemplate;

@@ -7,8 +7,10 @@ import {
     TouchableOpacity,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function NotificationsScreen({ navigation }: any) {
+    const { theme } = useTheme();
     const notifications = [
         {
             id: 1,
@@ -75,27 +77,39 @@ export default function NotificationsScreen({ navigation }: any) {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="arrow-back" size={24} color="#00512C" />
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Notifications</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                    Notifications
+                </Text>
                 <TouchableOpacity>
-                    <Text style={styles.markAllText}>Tout marquer</Text>
+                    <Text style={[styles.markAllText, { color: theme.colors.primary }]}>
+                        Tout marquer
+                    </Text>
                 </TouchableOpacity>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 {notifications.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="notifications-off-outline" size={64} color="#999" />
-                        <Text style={styles.emptyText}>Aucune notification</Text>
-                        <Text style={styles.emptySubtext}>Vous serez notifié des nouvelles activités</Text>
+                        <Ionicons
+                            name="notifications-off-outline"
+                            size={64}
+                            color={theme.colors.textMuted}
+                        />
+                        <Text style={[styles.emptyText, { color: theme.colors.text }]}>
+                            Aucune notification
+                        </Text>
+                        <Text style={[styles.emptySubtext, { color: theme.colors.textMuted }]}>
+                            Vous serez notifié des nouvelles activités
+                        </Text>
                     </View>
                 ) : (
                     notifications.map((notification) => (
@@ -115,11 +129,23 @@ export default function NotificationsScreen({ navigation }: any) {
                             </View>
                             <View style={styles.notificationContent}>
                                 <View style={styles.notificationHeader}>
-                                    <Text style={styles.notificationTitle}>{notification.title}</Text>
+                                    <Text
+                                        style={[styles.notificationTitle, { color: theme.colors.text }]}
+                                    >
+                                        {notification.title}
+                                    </Text>
                                     {!notification.read && <View style={styles.unreadDot} />}
                                 </View>
-                                <Text style={styles.notificationMessage}>{notification.message}</Text>
-                                <Text style={styles.notificationTime}>{notification.time}</Text>
+                                <Text
+                                    style={[styles.notificationMessage, { color: theme.colors.textMuted }]}
+                                >
+                                    {notification.message}
+                                </Text>
+                                <Text
+                                    style={[styles.notificationTime, { color: theme.colors.textMuted }]}
+                                >
+                                    {notification.time}
+                                </Text>
                             </View>
                         </TouchableOpacity>
                     ))

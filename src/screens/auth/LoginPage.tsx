@@ -6,6 +6,7 @@ import ScreenTemplate from '../templates/ScreenTemplate';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 function LoginPage() {
   const [email, setEmail] = useState('');
@@ -13,6 +14,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { login } = useAuth();
+  const { theme } = useTheme();
 
   const handleSubmit = async () => {
     if (!email || !password) {
@@ -44,13 +46,15 @@ function LoginPage() {
         <Image
           source={require('../../assets/images/background/coffee_pattern.png')}
           style={styles.pattern}
-          resizeMode="repeat"
-        />
+          resizeMode="cover"
+          />
 
         {/* Contenu */}
         <View style={styles.container}>
-          <Text style={styles.title}>Welcome Back</Text>
-          <Text style={styles.subtitle}>Login to your account</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>{'Welcome Back'}</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+            Login to your account
+          </Text>
 
           <View style={styles.form}>
             <Input placeholder="Email" value={email} onChangeText={setEmail} />
@@ -65,10 +69,10 @@ function LoginPage() {
             {loading && <ActivityIndicator style={styles.loader} />}
           </View>
 
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>
             Don't have an account?{' '}
             <Text
-              style={styles.link}
+              style={[styles.link, { color: theme.colors.primary }]}
               onPress={() => navigation.navigate('SignUp' as never)}
             >
               Sign Up
@@ -87,7 +91,7 @@ const styles = StyleSheet.create({
 
   pattern: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.18,
+    opacity: 1,
   },
 
   container: {

@@ -11,10 +11,12 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import { products } from '../../data/products';
 import { useCart } from '../../context/CartContext';
 import { useFavorite } from '../../context/FavoriteContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function FavoriteProduct({ navigation }: any) {
     const { addToCart, items } = useCart();
     const { favorites, toggleFavorite } = useFavorite();
+    const { theme } = useTheme();
     
     const cartItemCount = items.reduce((sum, item) => sum + item.quantity, 0);
     
@@ -22,25 +24,27 @@ export default function FavoriteProduct({ navigation }: any) {
     const favoriteProducts = products.filter(product => favorites.includes(product.id));
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Favorite</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Favorite</Text>
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 {favoriteProducts.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="heart-outline" size={64} color="#999" />
-                        <Text style={styles.emptyText}>Aucun favori</Text>
-                        <Text style={styles.emptySubtext}>Ajoutez des produits à vos favoris</Text>
+                        <Ionicons name="heart-outline" size={64} color={theme.colors.textMuted} />
+                        <Text style={[styles.emptyText, { color: theme.colors.text }]}>Aucun favori</Text>
+                        <Text style={[styles.emptySubtext, { color: theme.colors.textMuted }]}>
+                            Ajoutez des produits à vos favoris
+                        </Text>
                     </View>
                 ) : (
                     <View style={styles.cardRow}>
                         {favoriteProducts.map(product => (
                             <TouchableOpacity
                                 key={product.id}
-                                style={styles.card}
+                                style={[styles.card, { backgroundColor: theme.colors.card }]}
                                 onPress={() => navigation.navigate("ProductDetails", { product })}
                             >
                                 <Image source={product.image} style={styles.cardImage} />
@@ -52,15 +56,19 @@ export default function FavoriteProduct({ navigation }: any) {
                                     <Ionicons 
                                         name={favorites.includes(product.id) ? "heart" : "heart-outline"} 
                                         size={20} 
-                                        color={favorites.includes(product.id) ? "#FF0000" : "#00512C"} 
+                                        color={favorites.includes(product.id) ? "#FF0000" : theme.colors.primary} 
                                     />
                                 </TouchableOpacity>
 
-                                <Text style={styles.cardTitle}>{product.title}</Text>
-                                <Text style={styles.cardSub}>{product.subtitle}</Text>
+                                <Text style={[styles.cardTitle, { color: theme.colors.text }]}>
+                                    {product.title}
+                                </Text>
+                                <Text style={[styles.cardSub, { color: theme.colors.textMuted }]}>
+                                    {product.subtitle}
+                                </Text>
 
                                 <View style={styles.cardBottom}>
-                                    <Text style={styles.cardPrice}>
+                                    <Text style={[styles.cardPrice, { color: theme.colors.primary }]}>
                                         Rp {product.price.toLocaleString()}
                                     </Text>
 
@@ -78,18 +86,18 @@ export default function FavoriteProduct({ navigation }: any) {
             </ScrollView>
 
             {/* BOTTOM TAB */}
-            <View style={styles.bottomTab}>
+            <View style={[styles.bottomTab, { backgroundColor: theme.colors.surface }]}>
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-                    <Ionicons name="home" size={26} color="#999" />
+                    <Ionicons name="home" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Ionicons name="heart" size={26} color="#00512C" />
+                    <Ionicons name="heart" size={26} color={theme.colors.primary} />
                 </TouchableOpacity>
                 <TouchableOpacity 
                     onPress={() => navigation.navigate('Cart')}
                     style={styles.cartIconContainer}
                 >
-                    <Ionicons name="cart-outline" size={26} color="#999" />
+                    <Ionicons name="cart-outline" size={26} color={theme.colors.textMuted} />
                     {cartItemCount > 0 && (
                         <View style={styles.cartBadge}>
                             <Text style={styles.cartBadgeText}>
@@ -99,7 +107,7 @@ export default function FavoriteProduct({ navigation }: any) {
                     )}
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('ProfileDetails')}>
-                    <Ionicons name="person-outline" size={26} color="#999" />
+                    <Ionicons name="person-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
             </View>
         </View>

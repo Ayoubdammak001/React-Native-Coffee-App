@@ -1,9 +1,11 @@
 import React, { PropsWithChildren } from 'react';
 import { View, ScrollView } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useTheme } from '../../context/ThemeContext';
 
 function ScreenTemplate(props: PropsWithChildren) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
 
   return (
     <View
@@ -12,10 +14,12 @@ function ScreenTemplate(props: PropsWithChildren) {
         paddingBottom: insets.bottom,
         paddingLeft: insets.left,
         paddingRight: insets.right,
-        flex: 1
+        flex: 1,
+        backgroundColor: theme.colors.background,
       }}
     >
-      <ScrollView style={{ flex: 1 }}
+      <ScrollView
+        style={{ flex: 1 }}
         contentContainerStyle={{ flexGrow: 1 }}
       >
         {props.children}

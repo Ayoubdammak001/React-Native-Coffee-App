@@ -14,7 +14,7 @@ export default function WelcomeScreen({ navigation }: any) {
             <Image
                 source={require('../../assets/images/background/coffee_pattern.png')}
                 style={styles.pattern}
-                resizeMode="repeat"
+                resizeMode="cover"
             />
 
             {/* CONTENU */}

@@ -8,54 +8,63 @@ import {
     Switch,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function SettingsScreen({ navigation }: any) {
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const [emailNotifications, setEmailNotifications] = useState(false);
-    const [darkMode, setDarkMode] = useState(false);
     const [language, setLanguage] = useState('Français');
+    const { theme, toggleTheme } = useTheme();
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="arrow-back" size={24} color="#00512C" />
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Paramètres</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                    Paramètres
+                </Text>
                 <View style={styles.placeholder} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false} style={styles.scrollView}>
                 {/* NOTIFICATIONS SECTION */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Notifications</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+                        Notifications
+                    </Text>
                     
                     <View style={styles.settingItem}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="notifications-outline" size={24} color="#00512C" />
-                            <Text style={styles.settingText}>Notifications push</Text>
+                            <Ionicons name="notifications-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.settingText, { color: theme.colors.text }]}>
+                                Notifications push
+                            </Text>
                         </View>
                         <Switch
                             value={notificationsEnabled}
                             onValueChange={setNotificationsEnabled}
-                            trackColor={{ false: '#E0E0E0', true: '#00512C' }}
+                            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
                             thumbColor={notificationsEnabled ? '#fff' : '#f4f3f4'}
                         />
                     </View>
 
                     <View style={styles.settingItem}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="mail-outline" size={24} color="#00512C" />
-                            <Text style={styles.settingText}>Notifications email</Text>
+                            <Ionicons name="mail-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.settingText, { color: theme.colors.text }]}>
+                                Notifications email
+                            </Text>
                         </View>
                         <Switch
                             value={emailNotifications}
                             onValueChange={setEmailNotifications}
-                            trackColor={{ false: '#E0E0E0', true: '#00512C' }}
+                            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
                             thumbColor={emailNotifications ? '#fff' : '#f4f3f4'}
                         />
                     </View>
@@ -63,46 +72,60 @@ export default function SettingsScreen({ navigation }: any) {
 
                 {/* APPEARANCE SECTION */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Apparence</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+                        Apparence
+                    </Text>
                     
                     <View style={styles.settingItem}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="moon-outline" size={24} color="#00512C" />
-                            <Text style={styles.settingText}>Mode sombre</Text>
+                            <Ionicons name="moon-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.settingText, { color: theme.colors.text }]}>
+                                Mode sombre
+                            </Text>
                         </View>
                         <Switch
-                            value={darkMode}
-                            onValueChange={setDarkMode}
-                            trackColor={{ false: '#E0E0E0', true: '#00512C' }}
-                            thumbColor={darkMode ? '#fff' : '#f4f3f4'}
+                            value={theme.name === 'dark'}
+                            onValueChange={toggleTheme}
+                            trackColor={{ false: '#E0E0E0', true: theme.colors.primary }}
+                            thumbColor={theme.name === 'dark' ? '#fff' : '#f4f3f4'}
                         />
                     </View>
                 </View>
 
                 {/* LANGUAGE SECTION */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Langue</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+                        Langue
+                    </Text>
                     
                     <TouchableOpacity style={styles.settingItem}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="language-outline" size={24} color="#00512C" />
-                            <Text style={styles.settingText}>Langue de l'application</Text>
+                            <Ionicons name="language-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.settingText, { color: theme.colors.text }]}>
+                                Langue de l'application
+                            </Text>
                         </View>
                         <View style={styles.settingRight}>
-                            <Text style={styles.settingValue}>{language}</Text>
-                            <Ionicons name="chevron-forward" size={20} color="#999" />
+                            <Text style={[styles.settingValue, { color: theme.colors.textMuted }]}>
+                                {language}
+                            </Text>
+                            <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
                         </View>
                     </TouchableOpacity>
                 </View>
 
                 {/* ACCOUNT SECTION */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Compte</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+                        Compte
+                    </Text>
                     
                     <TouchableOpacity style={styles.settingItem}>
                         <View style={styles.settingLeft}>
-                            <Ionicons name="lock-closed-outline" size={24} color="#00512C" />
-                            <Text style={styles.settingText}>Changer le mot de passe</Text>
+                            <Ionicons name="lock-closed-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.settingText, { color: theme.colors.text }]}>
+                                Changer le mot de passe
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>
@@ -110,7 +133,9 @@ export default function SettingsScreen({ navigation }: any) {
                     <TouchableOpacity style={styles.settingItem}>
                         <View style={styles.settingLeft}>
                             <Ionicons name="trash-outline" size={24} color="#FF3B30" />
-                            <Text style={[styles.settingText, styles.dangerText]}>Supprimer le compte</Text>
+                            <Text style={[styles.settingText, styles.dangerText]}>
+                                Supprimer le compte
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>

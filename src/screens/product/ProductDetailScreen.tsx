@@ -11,6 +11,7 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 import { useCart } from "../../context/CartContext";
 import { useFavorite } from "../../context/FavoriteContext";
+import { useTheme } from "../../context/ThemeContext";
 
 export default function ProductDetailsScreen({ route, navigation }: any) {
   // Tous les hooks doivent être appelés en premier, dans le même ordre à chaque rendu
@@ -18,6 +19,7 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
   const { isFavorite, toggleFavorite } = useFavorite();
   const [selectedSize, setSelectedSize] = useState("Small");
   const [selectedSugar, setSelectedSugar] = useState("No Sugar");
+  const { theme } = useTheme();
 
   // Accéder aux paramètres après les hooks
   const product = route.params?.product;
@@ -44,20 +46,20 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
   // Si le produit n'est pas disponible, afficher un message d'erreur
   if (!product) {
     return (
-      <View style={styles.container}>
-        <Text style={styles.title}>Product not found</Text>
+      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
+        <Text style={[styles.title, { color: theme.colors.text }]}>Product not found</Text>
         <TouchableOpacity
           style={styles.backBtn}
           onPress={() => navigation.goBack()}
         >
-          <Ionicons name="chevron-back" size={26} color="#0A2F17" />
+          <Ionicons name="chevron-back" size={26} color={theme.colors.primary} />
         </TouchableOpacity>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
       {/* TOP IMAGE */}
       <Image source={product.image} style={styles.image} />
 
@@ -66,7 +68,7 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
         style={styles.backBtn}
         onPress={() => navigation.goBack()}
       >
-        <Ionicons name="chevron-back" size={26} color="#0A2F17" />
+        <Ionicons name="chevron-back" size={26} color={theme.colors.primary} />
       </TouchableOpacity>
 
       {/* FAVORITE BUTTON */}
@@ -77,14 +79,19 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
         <Ionicons 
           name={product && isFavorite(product.id) ? "heart" : "heart-outline"} 
           size={26} 
-          color={product && isFavorite(product.id) ? "#FF0000" : "#0A2F17"} 
+          color={product && isFavorite(product.id) ? "#FF0000" : theme.colors.primary} 
         />
       </TouchableOpacity>
 
       {/* WHITE CONTENT */}
-      <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>{product.title}</Text>
-        <Text style={styles.subtitle}>{product.subtitle}</Text>
+      <ScrollView
+        style={[styles.content, { backgroundColor: theme.colors.surface }]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Text style={[styles.title, { color: theme.colors.text }]}>{product.title}</Text>
+        <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+          {product.subtitle}
+        </Text>
 
         <View style={styles.ratingBox}>
           <Ionicons name="star" size={16} color="#fff" />
@@ -92,7 +99,7 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
         </View>
 
         {/* CUP SIZE */}
-        <Text style={styles.sectionTitle}>Cup Size</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>Cup Size</Text>
 
         <View style={styles.row}>
           {["Small", "Medium", "Large"].map((size) => (
@@ -100,14 +107,20 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
               key={size}
               style={[
                 styles.optionBtn,
-                selectedSize === size && styles.optionBtnActive,
+                {
+                  backgroundColor:
+                    selectedSize === size ? theme.colors.primary : theme.colors.input,
+                },
               ]}
               onPress={() => setSelectedSize(size)}
             >
               <Text
                 style={[
                   styles.optionText,
-                  selectedSize === size && styles.optionTextActive,
+                  {
+                    color:
+                      selectedSize === size ? "#fff" : theme.colors.text,
+                  },
                 ]}
               >
                 {size}
@@ -117,7 +130,9 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
         </View>
 
         {/* SUGAR LEVEL */}
-        <Text style={styles.sectionTitle}>Level Sugar</Text>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+          Level Sugar
+        </Text>
 
         <View style={styles.row}>
           {["No Sugar", "Low", "Medium"].map((level) => (
@@ -125,14 +140,20 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
               key={level}
               style={[
                 styles.optionBtn,
-                selectedSugar === level && styles.optionBtnActive,
+                {
+                  backgroundColor:
+                    selectedSugar === level ? theme.colors.primary : theme.colors.input,
+                },
               ]}
               onPress={() => setSelectedSugar(level)}
             >
               <Text
                 style={[
                   styles.optionText,
-                  selectedSugar === level && styles.optionTextActive,
+                  {
+                    color:
+                      selectedSugar === level ? "#fff" : theme.colors.text,
+                  },
                 ]}
               >
                 {level}
@@ -142,8 +163,8 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
         </View>
 
         {/* ABOUT */}
-        <Text style={styles.sectionTitle}>About</Text>
-        <Text style={styles.aboutText}>
+        <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>About</Text>
+        <Text style={[styles.aboutText, { color: theme.colors.textMuted }]}>
           Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
           eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
           minim veniam, quis nostrud exercitation ullamco laboris nisi ut
@@ -152,8 +173,11 @@ export default function ProductDetailsScreen({ route, navigation }: any) {
       </ScrollView>
 
       {/* ADD TO CART */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.cartBtn} onPress={handleAddToCart}>
+      <View style={[styles.footer, { backgroundColor: theme.colors.surface }]}>
+        <TouchableOpacity
+          style={[styles.cartBtn, { backgroundColor: theme.colors.primary }]}
+          onPress={handleAddToCart}
+        >
           <Text style={styles.cartBtnText}>Add to cart</Text>
           <Text style={styles.cartPrice}>Rp {product.price.toLocaleString()}</Text>
         </TouchableOpacity>
@@ -248,13 +272,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#EEE",
   },
 
-  optionBtnActive: {
-    backgroundColor: "#0A2F17",
-  },
+  optionBtnActive: {}, // colors overridden by theme
 
   optionText: { color: "#444", fontSize: 14 },
 
-  optionTextActive: { color: "#fff", fontWeight: "600" },
+  optionTextActive: {}, // colors overridden by theme
 
   aboutText: {
     color: "#666",

@@ -1,4 +1,5 @@
 import { TextInput, KeyboardTypeOptions } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 interface InputProps {
     placeholder: string;
@@ -10,18 +11,20 @@ interface InputProps {
 }
 
 function Input(props: InputProps) {
+    const { theme } = useTheme();
+
     return (
         <TextInput
             style={{
                 height: 48,
                 width: "100%",
-                borderColor: "#EAEAEA",
+                borderColor: theme.colors.border,
                 borderWidth: 2,
-                backgroundColor: "#EAEAEA",
+                backgroundColor: theme.colors.input,
                 borderRadius: 12,
                 paddingHorizontal: 20,
                 marginBottom: 15,
-                color: "#000",
+                color: theme.colors.text,
             }}
             placeholder={props.placeholder}
             value={props.value}
@@ -29,7 +32,7 @@ function Input(props: InputProps) {
             secureTextEntry={props.secureTextEntry}
             keyboardType={props.keyboardType}
             autoCapitalize={props.autoCapitalize}
-            placeholderTextColor="#999"
+            placeholderTextColor={theme.colors.textMuted}
         />
     );
 }

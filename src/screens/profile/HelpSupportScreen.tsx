@@ -8,8 +8,10 @@ import {
     Linking,
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function HelpSupportScreen({ navigation }: any) {
+    const { theme } = useTheme();
     const helpItems = [
         {
             id: 1,
@@ -69,16 +71,18 @@ export default function HelpSupportScreen({ navigation }: any) {
     ];
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="arrow-back" size={24} color="#00512C" />
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Aide & Support</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>
+                    Aide & Support
+                </Text>
                 <View style={styles.placeholder} />
             </View>
 
@@ -92,24 +96,43 @@ export default function HelpSupportScreen({ navigation }: any) {
                             onPress={item.action}
                         >
                             <View style={styles.helpItemLeft}>
-                                <Ionicons name={item.icon} size={24} color="#00512C" />
+                                <Ionicons name={item.icon} size={24} color={theme.colors.primary} />
                                 <View style={styles.helpItemText}>
-                                    <Text style={styles.helpItemTitle}>{item.title}</Text>
-                                    <Text style={styles.helpItemDescription}>{item.description}</Text>
+                                    <Text
+                                        style={[styles.helpItemTitle, { color: theme.colors.text }]}
+                                    >
+                                        {item.title}
+                                    </Text>
+                                    <Text
+                                        style={[
+                                            styles.helpItemDescription,
+                                            { color: theme.colors.textMuted },
+                                        ]}
+                                    >
+                                        {item.description}
+                                    </Text>
                                 </View>
                             </View>
-                            <Ionicons name="chevron-forward" size={20} color="#999" />
+                            <Ionicons name="chevron-forward" size={20} color={theme.colors.textMuted} />
                         </TouchableOpacity>
                     ))}
                 </View>
 
                 {/* FAQ SECTION */}
                 <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>Questions fréquentes</Text>
+                    <Text style={[styles.sectionTitle, { color: theme.colors.primary }]}>
+                        Questions fréquentes
+                    </Text>
                     {topics.map((topic) => (
                         <View key={topic.id} style={styles.faqItem}>
-                            <Text style={styles.faqTitle}>{topic.title}</Text>
-                            <Text style={styles.faqContent}>{topic.content}</Text>
+                            <Text style={[styles.faqTitle, { color: theme.colors.text }]}>
+                                {topic.title}
+                            </Text>
+                            <Text
+                                style={[styles.faqContent, { color: theme.colors.textMuted }]}
+                            >
+                                {topic.content}
+                            </Text>
                         </View>
                     ))}
                 </View>

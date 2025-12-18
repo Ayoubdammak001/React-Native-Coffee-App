@@ -1,6 +1,7 @@
 import React from 'react';
 import { TouchableOpacity, Text, StyleSheet } from 'react-native';
 import { StyleProp, ViewStyle } from "react-native";
+import { useTheme } from "../context/ThemeContext";
 
 interface ButtonProps {
   title: string;
@@ -10,12 +11,14 @@ interface ButtonProps {
 }
 
 export default function Button({ title, onPress, style, disabled = false }: ButtonProps) {
+  const { theme } = useTheme();
+
   return (
     <TouchableOpacity
       style={[
         styles.submitButton,
+        { backgroundColor: disabled ? '#CCCCCC' : theme.colors.primary },
         style,
-        disabled && styles.submitButtonDisabled,
       ]}
       onPress={onPress}
       disabled={disabled}
@@ -36,7 +39,6 @@ const styles = StyleSheet.create({
   submitButton: {
     height: 48,
     width: '100%',
-    backgroundColor: '#007AFF',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -48,7 +50,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   submitButtonDisabled: {
-    backgroundColor: '#CCCCCC',
     opacity: 0.6,
   },
   submitButtonTextDisabled: {

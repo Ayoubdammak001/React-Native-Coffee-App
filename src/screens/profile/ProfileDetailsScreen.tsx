@@ -10,9 +10,11 @@ import {
 } from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 export default function ProfileDetailsScreen({ navigation }: any) {
     const { user, logout } = useAuth();
+    const { theme } = useTheme();
 
     const handleLogout = () => {
         Alert.alert(
@@ -39,16 +41,16 @@ export default function ProfileDetailsScreen({ navigation }: any) {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
             {/* HEADER */}
             <View style={styles.header}>
                 <TouchableOpacity 
                     onPress={() => navigation.goBack()}
                     style={styles.backButton}
                 >
-                    <Ionicons name="arrow-back" size={24} color="#00512C" />
+                    <Ionicons name="arrow-back" size={24} color={theme.colors.primary} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={[styles.headerTitle, { color: theme.colors.text }]}>Profile</Text>
                 <View style={styles.placeholder} />
             </View>
 
@@ -66,34 +68,44 @@ export default function ProfileDetailsScreen({ navigation }: any) {
 
                 {/* USER INFO SECTION */}
                 <View style={styles.infoSection}>
-                    <View style={styles.infoCard}>
+                    <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}> 
                         <View style={styles.infoRow}>
-                            <Ionicons name="person-outline" size={24} color="#00512C" />
+                            <Ionicons name="person-outline" size={24} color={theme.colors.primary} />
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Nom</Text>
-                                <Text style={styles.infoValue}>
+                                <Text style={[styles.infoLabel, { color: theme.colors.textMuted }]}>
+                                    Nom
+                                </Text>
+                                <Text style={[styles.infoValue, { color: theme.colors.text }]}>
                                     {user?.name || 'Non défini'}
                                 </Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={styles.infoCard}>
+                    <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}>
                         <View style={styles.infoRow}>
-                            <Ionicons name="mail-outline" size={24} color="#00512C" />
+                            <Ionicons name="mail-outline" size={24} color={theme.colors.primary} />
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>Email</Text>
-                                <Text style={styles.infoValue}>{user?.email || ''}</Text>
+                                <Text style={[styles.infoLabel, { color: theme.colors.textMuted }]}>
+                                    Email
+                                </Text>
+                                <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+                                    {user?.email || ''}
+                                </Text>
                             </View>
                         </View>
                     </View>
 
-                    <View style={styles.infoCard}>
+                    <View style={[styles.infoCard, { backgroundColor: theme.colors.surface }]}>
                         <View style={styles.infoRow}>
-                            <Ionicons name="key-outline" size={24} color="#00512C" />
+                            <Ionicons name="key-outline" size={24} color={theme.colors.primary} />
                             <View style={styles.infoContent}>
-                                <Text style={styles.infoLabel}>ID Utilisateur</Text>
-                                <Text style={styles.infoValue}>{user?.id || ''}</Text>
+                                <Text style={[styles.infoLabel, { color: theme.colors.textMuted }]}>
+                                    ID Utilisateur
+                                </Text>
+                                <Text style={[styles.infoValue, { color: theme.colors.text }]}>
+                                    {user?.id || ''}
+                                </Text>
                             </View>
                         </View>
                     </View>
@@ -106,8 +118,10 @@ export default function ProfileDetailsScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('Settings')}
                     >
                         <View style={styles.menuItemLeft}>
-                            <Ionicons name="settings-outline" size={24} color="#00512C" />
-                            <Text style={styles.menuItemText}>Paramètres</Text>
+                            <Ionicons name="settings-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.menuItemText, { color: theme.colors.text }]}>
+                                Paramètres
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>
@@ -117,8 +131,10 @@ export default function ProfileDetailsScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('Notifications')}
                     >
                         <View style={styles.menuItemLeft}>
-                            <Ionicons name="notifications-outline" size={24} color="#00512C" />
-                            <Text style={styles.menuItemText}>Notifications</Text>
+                            <Ionicons name="notifications-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.menuItemText, { color: theme.colors.text }]}>
+                                Notifications
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>
@@ -128,8 +144,10 @@ export default function ProfileDetailsScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('HelpSupport')}
                     >
                         <View style={styles.menuItemLeft}>
-                            <Ionicons name="help-circle-outline" size={24} color="#00512C" />
-                            <Text style={styles.menuItemText}>Aide & Support</Text>
+                            <Ionicons name="help-circle-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.menuItemText, { color: theme.colors.text }]}>
+                                Aide & Support
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>
@@ -139,8 +157,10 @@ export default function ProfileDetailsScreen({ navigation }: any) {
                         onPress={() => navigation.navigate('PrivacyPolicy')}
                     >
                         <View style={styles.menuItemLeft}>
-                            <Ionicons name="document-text-outline" size={24} color="#00512C" />
-                            <Text style={styles.menuItemText}>Politique de confidentialité</Text>
+                            <Ionicons name="document-text-outline" size={24} color={theme.colors.primary} />
+                            <Text style={[styles.menuItemText, { color: theme.colors.text }]}>
+                                Politique de confidentialité
+                            </Text>
                         </View>
                         <Ionicons name="chevron-forward" size={20} color="#999" />
                     </TouchableOpacity>
@@ -154,18 +174,23 @@ export default function ProfileDetailsScreen({ navigation }: any) {
             </ScrollView>
 
             {/* BOTTOM NAVIGATION */}
-            <View style={styles.bottomTab}>
+            <View
+                style={[
+                    styles.bottomTab,
+                    { backgroundColor: theme.colors.surface, borderColor: theme.colors.border },
+                ]}
+            >
                 <TouchableOpacity onPress={() => navigation.navigate('HomeScreen')}>
-                    <Ionicons name="home" size={26} color="#999" />
+                    <Ionicons name="home" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('FavoriteProduct')}>
-                    <Ionicons name="heart-outline" size={26} color="#999" />
+                    <Ionicons name="heart-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => navigation.navigate('Cart')}>
-                    <Ionicons name="cart-outline" size={26} color="#999" />
+                    <Ionicons name="cart-outline" size={26} color={theme.colors.textMuted} />
                 </TouchableOpacity>
                 <TouchableOpacity>
-                    <Ionicons name="person-outline" size={26} color="#00512C" />
+                    <Ionicons name="person-outline" size={26} color={theme.colors.primary} />
                 </TouchableOpacity>
             </View>
         </View>

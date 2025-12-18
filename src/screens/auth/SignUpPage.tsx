@@ -5,6 +5,7 @@ import Button from '../../components/Button';
 import ScreenTemplate from '../templates/ScreenTemplate';
 import LinearGradient from 'react-native-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { useTheme } from '../../context/ThemeContext';
 
 // Import conditionnel pour gérer les erreurs AsyncStorage
 let useAuth: any;
@@ -26,6 +27,7 @@ function SignUpPage() {
   const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   const { register } = useAuth();
+  const { theme } = useTheme();
 
   const handleSubmit = async () => {
     // Validation
@@ -71,12 +73,14 @@ function SignUpPage() {
         <Image
           source={require('../../assets/images/background/coffee_pattern.png')}
           style={styles.pattern}
-          resizeMode="repeat"
-        />
+          resizeMode="cover"
+          />
 
         <View style={styles.container}>
-          <Text style={styles.title}>Create Account</Text>
-          <Text style={styles.subtitle}>Sign up to get started</Text>
+          <Text style={[styles.title, { color: theme.colors.text }]}>Create Account</Text>
+          <Text style={[styles.subtitle, { color: theme.colors.textMuted }]}>
+            Sign up to get started
+          </Text>
 
           <View style={styles.form}>
             <Input
@@ -113,10 +117,10 @@ function SignUpPage() {
             {loading && <ActivityIndicator style={styles.loader} />}
           </View>
 
-          <Text style={styles.footerText}>
+          <Text style={[styles.footerText, { color: theme.colors.textMuted }]}>
             Already have an account?{' '}
             <Text
-              style={styles.link}
+              style={[styles.link, { color: theme.colors.primary }]}
               onPress={() => navigation.navigate('Login' as never)}
             >
               Login
@@ -134,7 +138,7 @@ const styles = StyleSheet.create({
   },
   pattern: {
     ...StyleSheet.absoluteFillObject,
-    opacity: 0.18,
+    opacity: 1,
   },
   container: {
     flex: 1,
