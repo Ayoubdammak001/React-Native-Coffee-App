@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
 
     pattern: {
         ...StyleSheet.absoluteFillObject,
-        opacity: 0.15,
+        opacity: 1,
     },
 
     container: {

@@ -51,12 +51,8 @@ function SignUpPage() {
     setLoading(false);
 
     if (result.success) {
-      Alert.alert('Succès', 'Inscription réussie !', [
-        {
-          text: 'OK',
-          onPress: () => navigation.navigate('HomeScreen' as never),
-        },
-      ]);
+      Alert.alert('Succès', 'Inscription réussie !');
+      // AppNavigation basculera automatiquement vers PrivateNavigation après l'inscription
     } else {
       Alert.alert('Erreur', result.error || 'Erreur lors de l\'inscription');
     }

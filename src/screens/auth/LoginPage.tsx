@@ -26,11 +26,10 @@ function LoginPage() {
     const result = await login(email, password);
     setLoading(false);
 
-    if (result.success) {
-      navigation.navigate('HomeScreen' as never);
-    } else {
+    if (!result.success) {
       Alert.alert('Erreur', result.error || 'Email ou mot de passe incorrect');
     }
+    // Si la connexion réussit, AppNavigation basculera automatiquement vers PrivateNavigation
   };
 
   return (
